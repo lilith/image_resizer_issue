@@ -2,7 +2,7 @@
 
 these project currently contains three unit tests (using NUnit).
 
-you need to setup the nightly repo for image resizer first (https://www.myget.org/F/imazen-nightlies/api/v2).
+you need to setup the nuget 'nightly' feed for image resizer first (https://www.myget.org/F/imazen-nightlies/api/v2).
 
 when running two of the tests there will be created two files, one good and one bad one (having alpha-blending working and not working).
 
