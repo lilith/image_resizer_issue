@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 namespace ImageResizer.Demo
 {
-    internal class ImageTests
+    internal class ImageTests : Assert
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -35,6 +35,24 @@ namespace ImageResizer.Demo
         [Test]
         public void AlphaChannelWorkingProperly() {
             File.WriteAllBytes("alpha-working-in-watermark.jpg", ScaleDownAndBrand(Config.Current));
+        }
+
+        /// <summary>
+        /// the diagnostics has the following issues:
+        /// 
+        /// - there is no license (and we don't know how to add it via the managed API)
+        /// - it contains an
+        /// 
+        /// </summary>
+        [Test]
+        public void DiagnosticsContainsErrors() {
+            var config = new Config();
+            new FastScalingPlugin().Install(config);
+            new SimpleFilters().Install(config);
+            new WatermarkPlugin().Install(config);
+            var page = config.GetDiagnosticsPage();
+            IsTrue(page.Contains("ConfigChecker(Error):	Error checking for issues: System.NullReferenceException: Object reference not set to an instance of an object."), "null pointer");
+            IsTrue(page.Contains("You do not have any license keys installed."), "license missing but no way to add it?");
         }
 
         private static byte[] ScaleDownAndBrand(Config config) {
