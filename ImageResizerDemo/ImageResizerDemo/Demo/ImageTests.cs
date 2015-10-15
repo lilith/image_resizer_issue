@@ -8,6 +8,7 @@ using ImageResizer.Plugins.SimpleFilters;
 using ImageResizer.Plugins.Watermark;
 using NLog;
 using NUnit.Framework;
+using ImageResizer.Plugins.Basic;
 
 namespace ImageResizer.Demo
 {
@@ -51,11 +52,19 @@ namespace ImageResizer.Demo
             new SimpleFilters().Install(config);
             new WatermarkPlugin().Install(config);
             var page = config.GetDiagnosticsPage();
-            IsTrue(page.Contains("ConfigChecker(Error):	Error checking for issues: System.NullReferenceException: Object reference not set to an instance of an object."), "null pointer");
+            IsFalse(page.Contains("Error checking for issues"), "null pointer");
             IsTrue(page.Contains("You do not have any license keys installed."), "license missing but no way to add it?");
+
+            new StaticLicenseProvider("resizer.apphb.com(R4Performance includes R4Performance):RG9tYWluOiByZXNpemVyLmFwcGhiLmNvbQpPd25lcjogTmF0aGFuYWVsIEpvbmVzCklzc3VlZDogMjAxNS0wNS0wMVQxNTowNzo1NloKRm" + 
+                "VhdHVyZXM6IFI0UGVyZm9ybWFuY2U=:oWv2YlAkzTEWcaJ6fPMEsweTNh9Bt5evhjWVNHuXtiRNl22sSS3OB/XE69NsSx8kEs1ExSwzvjwPx95paQyxGsTDigdh/UCkh7TCUyIECX7pI2JtA5f3KkFzfwmISIE8d14Kyf3ijO6s2HI1A1obbH5Iuc" + 
+                "yaDJLQBCSrykxJK6JM4NOM82UbAUfwXRCnjWw2frwtBDp9rezJ46iQ80BXxTJ1LXlSqBry5z7bdSZtcP2k8L+Zp3t+9Blfl2k6z0um06kDa7RkPnmfwKCYTU+HbPQ2qDfGvcNaRC6XEa17ztTn52T6hErS7AJKIZ4OKxvw3olLmmVjEg+LiuKo7NVmmQ==").Install(config);
+
+            IsFalse(config.GetDiagnosticsPage().Contains("You do not have any license keys installed."), "license missing but no way to add it?");
+
         }
 
-        private static byte[] ScaleDownAndBrand(Config config) {
+        private static byte[] ScaleDownAndBrand(Config config)
+        {
             new FastScalingPlugin().Install(config);
             new SimpleFilters().Install(config);
             var wp = new WatermarkPlugin();
@@ -66,12 +75,14 @@ namespace ImageResizer.Demo
             watermark.Path = "wm.png";
             watermark.ImageQuery["fastscale"] = "true";
             watermark.ImageQuery["s.alpha"] = "0.2";
-            wp.NamedWatermarks["foo"] = new Layer[] {watermark};
+            wp.NamedWatermarks["foo"] = new Layer[] { watermark };
             // get source image
             var bytes = GetBytesFromBitmap(Resources.castrol_large, ImageFormat.Jpeg);
             var buffer = new byte[40000000]; // oversized buffer to avoid reallocations
-            // transform
-            using (var output = new MemoryStream(buffer)) {
+                                             // transform
+
+            using (var output = new MemoryStream(buffer))
+            {
                 var at = StartStopwatch();
                 var instructions = new Instructions();
                 instructions.OutputFormat = OutputFormat.Jpeg;
@@ -83,6 +94,8 @@ namespace ImageResizer.Demo
                 Log.Debug(at.ElapsedMilliseconds);
                 return output.ToArray();
             }
+
+            return null;
         }
 
         private static Stopwatch StartStopwatch() {
